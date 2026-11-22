@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>毛球小窩 · 電子寵物</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6efe4; --ink:#3b2f2a; --soft:#8a7a70; --card:#fffaf2; --line:#e7dccb;
+    --pink:#ff8fab; --mint:#7fd8be; --sun:#ffc857; --sky:#8ecae6; --plum:#b388eb;
+    --danger:#ef6461;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:"Zen Maru Gothic",system-ui,sans-serif;color:var(--ink);
+    background:var(--bg);
+    background-image:radial-gradient(#e9dcc6 1.2px,transparent 1.2px);
+    background-size:22px 22px;
+    display:flex;justify-content:center;align-items:flex-start;padding:28px 14px 40px;
+  }
+  .app{width:100%;max-width:440px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .brand{font-weight:900;font-size:22px;letter-spacing:.04em}
+  .brand small{display:block;font-size:12px;font-weight:500;color:var(--soft);letter-spacing:.1em}
+  .chip{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700}
+
+  /* device */
+  .device{
+    background:linear-gradient(160deg,#ffb4c6,#ff8fab 60%,#f07595);
+    border-radius:44px 44px 56px 56px;padding:22px 22px 26px;
+    box-shadow:0 18px 0 -6px #d9637f, 0 30px 50px -18px rgba(120,50,70,.45);
+    position:relative;
+  }
+  .device::before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:60px;height:6px;border-radius:9px;background:rgba(255,255,255,.45)}
+  .screen{
+    position:relative;height:300px;border-radius:26px;overflow:hidden;
+    background:linear-gradient(#cdeeff 0%,#e9f8ff 62%,#bfe3a3 62%,#a7d68a 100%);
+    border:5px solid #5a3a44;
+    transition:filter .6s;
+  }
+  .screen.night{filter:brightness(.55) saturate(.8)}
+  .screen.night .sky-sun{opacity:0}
+  .screen.night .moon{opacity:1}
+  .sky-sun{position:absolute;top:22px;right:28px;width:42px;height:42px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 8px rgba(255,200,87,.25);transition:opacity .6s}
+  .moon{position:absolute;top:22px;right:28px;width:38px;height:38px;border-radius:50%;box-shadow:-10px 6px 0 0 #fff6c9;opacity:0;transition:opacity .6s}
+  .cloud{position:absolute;background:#fff;border-radius:40px;height:18px;opacity:.9;animation:drift 38s linear infinite}
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+  .cloud::before{width:22px;height:22px;top:-11px;left:10px}
+  .cloud::after{width:16px;height:16px;top:-7px;left:28px}
+  @keyframes drift{from{transform:translateX(-80px)}to{transform:translateX(460px)}}
+
+  .stage-label{position:absolute;top:12px;left:14px;background:rgba(255,255,255,.85);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700}
+  #petWrap{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);width:150px;height:150px;cursor:pointer;transition:left 1.6s ease-in-out}
+  #pet{width:100%;height:100%;transform-origin:50% 100%;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,.95)}}
+  .sleeping #pet{animation:breathe 3s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.02,.98)}}
+  .jump #pet{animation:jump .55s ease-out 2}
+  @keyframes jump{0%{transform:translateY(0) scale(1.1,.9)}40%{transform:translateY(-40px) scale(.95,1.05)}100%{transform:translateY(0) scale(1,1)}}
+  .shake #pet{animation:shake .4s linear 3}
+  @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+  .flip #pet{transform:scaleX(-1)}
+
+  .poop{position:absolute;bottom:34px;font-size:26px;cursor:pointer;animation:pop .3s ease-out;filter:drop-shadow(0 2px 0 rgba(0,0,0,.15))}
+  @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+  .float{position:absolute;pointer-events:none;font-size:22px;animation:floatUp 1.3s ease-out forwards}
+  @keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
+  .zzz{position:absolute;font-weight:900;color:#fff;font-size:18px;animation:zz 2.4s ease-in-out infinite;pointer-events:none}
+  @keyframes zz{0%{opacity:0;transform:translate(0,0) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translate(26px,-50px) scale(1.2)}}
+  .bubble{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);background:#fff;border:3px solid #5a3a44;border-radius:16px;padding:6px 12px;font-size:14px;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .25s;pointer-events:none}
+  .bubble.show{opacity:1}
+  .bubble::after{content:"";position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);border:7px solid transparent;border-top-color:#5a3a44}
+
+  /* mini game */
+  #game{position:absolute;inset:0;display:none}
+  #game.on{display:block}
+  .treat{position:absolute;font-size:28px;cursor:pointer;user-select:none;animation:fall linear forwards}
+  @keyframes fall{from{top:-40px}to{top:300px}}
+  .game-hud{position:absolute;top:10px;right:12px;background:#5a3a44;color:#fff;border-radius:10px;padding:4px 10px;font-weight:900;font-size:13px}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:18px 4px 16px}
+  .stat{font-size:13px;font-weight:700;color:#fff}
+  .stat .top{display:flex;justify-content:space-between;margin-bottom:4px;text-shadow:0 1px 0 rgba(0,0,0,.15)}
+  .bar{height:12px;border-radius:9px;background:rgba(90,58,68,.35);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:9px;transition:width .5s,background .5s}
+  .bar.low i{animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.4}}
+
+  .buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .btn{
+    appearance:none;border:none;cursor:pointer;font-family:inherit;
+    background:#fff7ec;border-radius:20px;padding:10px 0 8px;
+    box-shadow:0 5px 0 #c9566f;font-weight:900;font-size:12px;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .08s, box-shadow .08s;
+  }
+  .btn span{font-size:24px;line-height:1.1}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #c9566f}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* side panels */
+  .panel{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px 16px;margin-top:16px}
+  .panel h3{margin:0 0 8px;font-size:15px}
+  .row{display:flex;gap:8px;align-items:center}
+  .row input{flex:1;font-family:inherit;font-size:15px;border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff;color:var(--ink)}
+  .small-btn{font-family:inherit;font-weight:700;border:none;border-radius:12px;padding:9px 12px;background:var(--ink);color:#fff;cursor:pointer}
+  .small-btn.ghost{background:transparent;color:var(--soft);border:2px solid var(--line)}
+  .log{list-style:none;margin:0;padding:0;font-size:13px;color:var(--soft);max-height:118px;overflow:auto}
+  .log li{padding:4px 0;border-bottom:1px dashed var(--line)}
+  .log li b{color:var(--ink)}
+  .meta{display:flex;justify-content:space-between;font-size:13px;color:var(--soft);margin-top:6px}
+  .colors{display:flex;gap:8px;margin-top:10px}
+  .sw{width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer}
+  .sw.sel{box-shadow:0 0 0 3px var(--ink)}
+
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(59,47,42,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+  .modal.on{display:flex}
+  .modal .box{background:var(--card);border-radius:24px;padding:24px;max-width:320px;text-align:center;border:3px solid #5a3a44}
+  .modal h2{margin:4px 0 6px}
+  .modal p{color:var(--soft);margin:0 0 16px;font-size:14px}
+  footer{text-align:center;font-size:12px;color:var(--soft);margin-top:18px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">毛球小窩<small>TAMAGO · DEMO</small></div>
+    <div class="chip" id="clock">第 1 天</div>
+  </header>
+
+  <div class="device">
+    <div class="screen" id="screen">
+      <div class="sky-sun"></div><div class="moon"></div>
+      <div class="cloud" style="top:40px;width:56px;animation-delay:-6s"></div>
+      <div class="cloud" style="top:86px;width:44px;animation-delay:-24s;animation-duration:52s"></div>
+      <div class="stage-label" id="stageLabel">🥚 蛋</div>
+      <div id="petWrap"><svg id="pet" viewBox="0 0 150 150"></svg></div>
+      <div class="bubble" id="bubble">嗨！</div>
+      <div id="game"><div class="game-hud" id="gameHud">接零食！ 0</div></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="buttons">
+      <button class="btn" data-act="feed"><span>🍙</span>餵食</button>
+      <button class="btn" data-act="play"><span>🎾</span>玩耍</button>
+      <button class="btn" data-act="bath"><span>🛁</span>洗澡</button>
+      <button class="btn" data-act="sleep" id="sleepBtn"><span>🌙</span>睡覺</button>
+      <button class="btn" data-act="clean"><span>🧹</span>清理</button>
+      <button class="btn" data-act="heal"><span>💊</span>看醫生</button>
+      <button class="btn" data-act="pet"><span>🤚</span>摸摸</button>
+      <button class="btn" data-act="speed" id="speedBtn"><span>⏩</span>1×</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>寵物資料</h3>
+    <div class="row">
+      <input id="nameInput" maxlength="10" placeholder="幫牠取個名字">
+      <button class="small-btn" id="saveName">命名</button>
+    </div>
+    <div class="colors" id="colors"></div>
+    <div class="meta"><span id="ageText">年齡：0 天</span><span id="moodText">心情：😊</span></div>
+  </div>
+
+  <div class="panel">
+    <h3>日誌</h3>
+    <ul class="log" id="log"></ul>
+  </div>
+
+  <div class="row" style="justify-content:center;margin-top:14px">
+    <button class="small-btn ghost" id="resetBtn">重新開始</button>
+  </div>
+  <footer>Demo：時間已加速，1 分鐘 ≈ 寵物的 1 天。點寵物會有反應。</footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <div style="font-size:48px" id="mIcon">👼</div>
+    <h2 id="mTitle">標題</h2>
+    <p id="mText">內容</p>
+    <button class="small-btn" id="mBtn">好</button>
+  </div>
+</div>
+
+<script>
+const COLORS = ["#ffd166","#7fd8be","#8ecae6","#b388eb","#ff9f80","#f4f1ea"];
+const STAGES = [
+  {key:"egg",  name:"🥚 蛋",   until:0.5},
+  {key:"baby", name:"🐣 寶寶", until:3},
+  {key:"kid",  name:"🌱 小孩", until:7},
+  {key:"adult",name:"⭐ 大人", until:Infinity},
+];
+const STATS = [
+  {k:"hunger", label:"飽足", icon:"🍙", color:"#ffc857"},
+  {k:"happy",  label:"開心", icon:"💖", color:"#ff8fab"},
+  {k:"energy", label:"體力", icon:"⚡", color:"#7fd8be"},
+  {k:"clean",  label:"清潔", icon:"🫧", color:"#8ecae6"},
+];
+const POOP=`<svg width="30" height="28" viewBox="0 0 30 28"><path d="M4 26h22c3 0 3-6-1-6 2-2 1-6-3-6 1-3-2-6-5-5 0-3-3-5-4-6 1 3-1 5-3 6-3 0-5 3-3 5-4 0-6 3-4 6-2 0-2 6 1 6z" fill="#9c6b4e" stroke="#3b2f2a" stroke-width="2" stroke-linejoin="round"/><circle cx="11" cy="17" r="1.6" fill="#3b2f2a"/><circle cx="18" cy="17" r="1.6" fill="#3b2f2a"/></svg>`;
+const DAY_MS = 60000; // 1 real minute = 1 pet day
+const KEY = "mochi-pet-v1";
+
+let S, speed = 1, gameState = null, bubbleT, last = Date.now();
+
+function fresh(){
+  return {name:"", color:COLORS[0], age:0, hunger:80, happy:80, energy:90, clean:90,
+          health:100, sick:false, asleep:false, poops:[], dead:false, born:Date.now(), log:[]};
+}
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw) return Object.assign(fresh(), JSON.parse(raw)); }catch(e){}
+  return fresh();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+const $ = id => document.getElementById(id);
+const clamp = v => Math.max(0, Math.min(100, v));
+const stage = () => STAGES.find(s => S.age < s.until);
+const petName = () => S.name || "毛球";
+
+function addLog(msg){
+  const day = Math.floor(S.age)+1;
+  S.log.unshift(`<b>第${day}天</b>　${msg}`);
+  S.log = S.log.slice(0,30);
+  renderLog();
+}
+function say(text, ms=1800){
+  const b = $("bubble"); b.textContent = text; b.classList.add("show");
+  clearTimeout(bubbleT); bubbleT = setTimeout(()=>b.classList.remove("show"), ms);
+}
+function floaty(emoji, x, y){
+  const f = document.createElement("div"); f.className="float"; f.textContent=emoji;
+  const r = $("petWrap").getBoundingClientRect(), sr = $("screen").getBoundingClientRect();
+  f.style.left = (x ?? (r.left - sr.left + 60 + (Math.random()*40-20)))+"px";
+  f.style.top  = (y ?? (r.top - sr.top + 10))+"px";
+  $("screen").appendChild(f); setTimeout(()=>f.remove(),1300);
+}
+function anim(cls){
+  const w = $("petWrap"); w.classList.remove("jump","shake"); void w.offsetWidth; w.classList.add(cls);
+  setTimeout(()=>w.classList.remove(cls), 1400);
+}
+
+function mood(){
+  if(S.dead) return "dead";
+  if(S.asleep) return "sleep";
+  if(S.sick) return "sick";
+  const avg = (S.hunger+S.happy+S.energy+S.clean)/4;
+  if(S.hunger < 20) return "hungry";
+  if(avg > 70) return "happy";
+  if(avg > 40) return "ok";
+  return "sad";
+}
+
+/* ---------- drawing ---------- */
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt;
+  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));
+  return "#"+((r<<16)|(g<<8)|b).toString(16).padStart(6,"0");
+}
+function draw(){
+  const st = stage().key, m = mood(), c = S.color, dk = shade(c,-45), ink="#3b2f2a";
+  let svg = `<ellipse cx="75" cy="142" rx="${st==="egg"?34:st==="baby"?32:44}" ry="7" fill="rgba(0,0,0,.13)"/>`;
+
+  if(st==="egg"){
+    const crack = S.age > 0.25;
+    svg += `<path d="M75 30 C110 30 118 90 116 108 C114 132 96 142 75 142 C54 142 36 132 34 108 C32 90 40 30 75 30Z" fill="#fffaf2" stroke="${ink}" stroke-width="4"/>
+      <circle cx="58" cy="80" r="8" fill="${c}"/><circle cx="92" cy="104" r="11" fill="${c}"/><circle cx="84" cy="60" r="6" fill="${c}"/>
+      ${crack?`<path d="M48 92 l10 -8 l8 10 l10 -10 l9 9 l10 -8" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`:""}`;
+    $("pet").innerHTML = svg; return;
+  }
+
+  const sz = st==="baby" ? 0.72 : st==="kid" ? 0.87 : 1;
+  const cx=75, by=142, w=56*sz, h=62*sz, top=by-h*2;
+  // body
+  svg += `<g>`;
+  if(st==="adult"){ // ears
+    svg += `<path d="M${cx-34} ${top+22} L${cx-44} ${top-8} L${cx-14} ${top+10}Z" fill="${c}" stroke="${ink}" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M${cx+34} ${top+22} L${cx+44} ${top-8} L${cx+14} ${top+10}Z" fill="${c}" stroke="${ink}" stroke-width="4" stroke-linejoin="round"/>`;
+  } else if(st==="kid"){ // sprout
+    svg += `<path d="M${cx} ${top+4} q-2 -16 6 -22" fill="none" stroke="#5aa469" stroke-width="4" stroke-linecap="round"/>
+            <ellipse cx="${cx+12}" cy="${top-18}" rx="10" ry="6" fill="#7fd8be" stroke="${ink}" stroke-width="3" transform="rotate(-20 ${cx+12} ${top-18})"/>`;
+  }
+  svg += `<path d="M${cx-w} ${by} C${cx-w-6} ${top+h*0.6} ${cx-w*0.7} ${top} ${cx} ${top} C${cx+w*0.7} ${top} ${cx+w+6} ${top+h*0.6} ${cx+w} ${by} Z"
+          fill="${c}" stroke="${ink}" stroke-width="4" stroke-linejoin="round"/>
+          <ellipse cx="${cx}" cy="${by-h*0.55}" rx="${w*0.55}" ry="${h*0.45}" fill="${shade(c,30)}" opacity=".7"/>`;
+  // feet
+  svg += `<ellipse cx="${cx-w*0.5}" cy="${by-2}" rx="${10*sz}" ry="${5*sz}" fill="${dk}" stroke="${ink}" stroke-width="3"/>
+          <ellipse cx="${cx+w*0.5}" cy="${by-2}" rx="${10*sz}" ry="${5*sz}" fill="${dk}" stroke="${ink}" stroke-width="3"/>`;
+  // face
+  const ey = top + h*0.75, ex = 18*sz, my = ey + 18*sz;
+  const eye = (x)=>{
+    if(m==="sleep" || m==="dead") return m==="dead"
+      ? `<path d="M${x-6} ${ey-6} l12 12 M${x+6} ${ey-6} l-12 12" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`
+      : `<path d="M${x-7} ${ey} q7 6 14 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`;
+    if(m==="happy") return `<path d="M${x-7} ${ey+2} q7 -9 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
+    if(m==="sad" || m==="sick") return `<ellipse cx="${x}" cy="${ey}" rx="5" ry="6.5" fill="${ink}"/><path d="M${x-8} ${ey-12} l14 ${x<cx?-5:5}" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`;
+    return `<ellipse cx="${x}" cy="${ey}" rx="5.5" ry="7" fill="${ink}"/><circle cx="${x+2}" cy="${ey-3}" r="2" fill="#fff"/>`;
+  };
+  svg += eye(cx-ex) + eye(cx+ex);
+  svg += `<ellipse cx="${cx-ex-10*sz}" cy="${ey+10*sz}" rx="7" ry="4" fill="#ff8fab" opacity="${m==="sick"?0:.6}"/>
+          <ellipse cx="${cx+ex+10*sz}" cy="${ey+10*sz}" rx="7" ry="4" fill="#ff8fab" opacity="${m==="sick"?0:.6}"/>`;
+  const mouths = {
+    happy:`<path d="M${cx-8} ${my-2} q8 10 16 0 z" fill="#c9566f" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`,
+    ok:`<path d="M${cx-6} ${my} q6 5 12 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`,
+    sad:`<path d="M${cx-7} ${my+3} q7 -6 14 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`,
+    hungry:`<ellipse cx="${cx}" cy="${my+1}" rx="6" ry="7" fill="#c9566f" stroke="${ink}" stroke-width="3"/>`,
+    sick:`<path d="M${cx-8} ${my} q4 -4 8 0 q4 4 8 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`,
+    sleep:`<ellipse cx="${cx}" cy="${my}" rx="3" ry="2.5" fill="${ink}"/>`,
+    dead:`<path d="M${cx-6} ${my+2} h12" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`,
+  };
+  svg += mouths[m];
+  if(m==="sick") svg += `<path d="M${cx+w-6} ${top+20} q6 10 0 14 q-6 -4 0 -14z" fill="#8ecae6" stroke="${ink}" stroke-width="2"/>`;
+  if(m==="dead") svg += `<ellipse cx="${cx}" cy="${top-12}" rx="22" ry="6" fill="none" stroke="#ffc857" stroke-width="4"/>`;
+  svg += `</g>`;
+  $("pet").innerHTML = svg;
+}
+
+/* ---------- ui ---------- */
+function renderStats(){
+  $("stats").innerHTML = STATS.map(s=>{
+    const v = Math.round(S[s.k]);
+    return `<div class="stat"><div class="top"><span>${s.icon} ${s.label}</span><span>${v}</span></div>
+      <div class="bar ${v<25?"low":""}"><i style="width:${v}%;background:${v<25?"#ef6461":s.color}"></i></div></div>`;
+  }).join("");
+}
+function renderLog(){ $("log").innerHTML = S.log.map(l=>`<li>${l}</li>`).join("") || `<li>還沒有紀錄</li>`; }
+function renderColors(){
+  $("colors").innerHTML = COLORS.map(c=>`<div class="sw ${c===S.color?"sel":""}" style="background:${c}" data-c="${c}" title="換顏色"></div>`).join("");
+}
+function render(){
+  const st = stage(), m = mood();
+  $("stageLabel").textContent = `${st.name}${S.name?" · "+S.name:""}`;
+  $("clock").textContent = `第 ${Math.floor(S.age)+1} 天`;
+  $("ageText").textContent = `年齡：${S.age.toFixed(1)} 天`;
+  const md = {happy:"😊 很好",ok:"🙂 普通",sad:"😢 不開心",hungry:"🤤 好餓",sick:"🤒 生病",sleep:"😴 睡覺中",dead:"👼 去天堂了"};
+  $("moodText").textContent = "心情：" + md[m];
+  $("screen").classList.toggle("night", S.asleep);
+  $("petWrap").classList.toggle("sleeping", S.asleep);
+  $("sleepBtn").innerHTML = S.asleep ? `<span>☀️</span>起床` : `<span>🌙</span>睡覺`;
+  const egg = st.key==="egg";
+  document.querySelectorAll(".btn[data-act]").forEach(b=>{
+    const a=b.dataset.act;
+    b.disabled = S.dead || (a!=="speed" && egg) || (S.asleep && !["sleep","speed"].includes(a)) || (gameState && a!=="speed");
+  });
+  renderStats(); draw(); renderPoops(); renderZ();
+}
+function renderPoops(){
+  document.querySelectorAll(".poop").forEach(p=>p.remove());
+  S.poops.forEach((x,i)=>{
+    const p=document.createElement("div"); p.className="poop"; p.innerHTML=POOP; p.style.left=x+"px";
+    p.onclick=()=>{ if(!S.asleep&&!S.dead){ S.poops.splice(i,1); S.clean=clamp(S.clean+8); floaty("✨"); render(); save(); } };
+    $("screen").appendChild(p);
+  });
+}
+let zTimer=null;
+function renderZ(){
+  if(S.asleep && !zTimer){
+    zTimer=setInterval(()=>{
+      const z=document.createElement("div"); z.className="zzz"; z.textContent="z";
+      const r=$("petWrap").getBoundingClientRect(), sr=$("screen").getBoundingClientRect();
+      z.style.left=(r.left-sr.left+100)+"px"; z.style.top=(r.top-sr.top+30)+"px";
+      $("screen").appendChild(z); setTimeout(()=>z.remove(),2400);
+    },800);
+  } else if(!S.asleep && zTimer){ clearInterval(zTimer); zTimer=null; }
+}
+
+/* ---------- actions ---------- */
+const actions = {
+  feed(){
+    if(S.hunger>95){ say("吃不下了～"); anim("shake"); S.happy=clamp(S.happy-3); return; }
+    S.hunger=clamp(S.hunger+28); S.clean=clamp(S.clean-4); floaty("🍙"); say("好好吃！"); anim("jump"); addLog(`${petName()} 吃了一顆飯糰`);
+    if(Math.random()<.35) setTimeout(()=>{ if(!S.dead){ S.poops.push(30+Math.random()*300); render(); save(); }}, 4000);
+  },
+  play(){
+    if(S.energy<15){ say("好累…想睡覺"); anim("shake"); return; }
+    startGame();
+  },
+  bath(){ S.clean=100; S.happy=clamp(S.happy+ (Math.random()<.5?-5:6)); floaty("🫧"); floaty("🫧"); say("香香的～"); addLog(`洗了個泡泡澡`); },
+  sleep(){
+    S.asleep=!S.asleep;
+    if(S.asleep){ say("晚安…"); addLog(`${petName()} 睡著了`); }
+    else { say(S.energy>70?"睡飽了！":"還好睏…"); anim("jump"); addLog(`${petName()} 起床了`); }
+  },
+  clean(){
+    if(!S.poops.length){ say("已經很乾淨囉"); return; }
+    S.clean=clamp(S.clean+S.poops.length*8); S.poops=[]; floaty("✨"); say("謝謝！"); addLog("把便便清乾淨了");
+  },
+  heal(){
+    if(!S.sick){ say("我沒生病啦！"); anim("shake"); S.happy=clamp(S.happy-5); return; }
+    S.sick=false; S.health=clamp(S.health+40); S.happy=clamp(S.happy-8); floaty("💊"); say("藥好苦…"); addLog("去看了醫生，病好了");
+  },
+  pet(){ S.happy=clamp(S.happy+6); floaty("💖"); say(["嘿嘿～","再摸一下！","好舒服","❤️"][Math.floor(Math.random()*4)]); anim("jump"); },
+  speed(){ speed = speed===1?5:speed===5?20:1; $("speedBtn").innerHTML=`<span>⏩</span>${speed}×`; say(`時間 ${speed} 倍速`); },
+};
+document.querySelectorAll(".btn[data-act]").forEach(b=>b.onclick=()=>{ actions[b.dataset.act](); render(); save(); });
+
+$("petWrap").onclick=()=>{
+  if(S.dead) return;
+  if(stage().key==="egg"){ anim("shake"); say("（蛋在動…）"); return; }
+  if(S.asleep){ say("Zzz…"); return; }
+  actions.pet(); render(); save();
+};
+
+/* ---------- mini game ---------- */
+function startGame(){
+  gameState={score:0,left:15}; $("game").classList.add("on"); say("接住零食！",1500);
+  const treats=["🍓","🍪","🍬","🧁","🍩"];
+  const spawn=()=>{
+    if(!gameState) return;
+    if(gameState.left--<=0){ return endGame(); }
+    const t=document.createElement("div"); t.className="treat";
+    t.textContent = Math.random()<.15 ? "🌶️" : treats[Math.floor(Math.random()*treats.length)];
+    t.style.left=(20+Math.random()*320)+"px"; const dur=1.6+Math.random()*1.2; t.style.animationDuration=dur+"s";
+    t.onpointerdown=e=>{
+      e.stopPropagation();
+      if(t.textContent==="🌶️"){ gameState.score=Math.max(0,gameState.score-1); floaty("🔥",parseFloat(t.style.left),t.offsetTop); }
+      else { gameState.score++; floaty("+1",parseFloat(t.style.left),t.offsetTop); }
+      $("gameHud").textContent=`接零食！ ${gameState.score}`; t.remove();
+    };
+    $("game").appendChild(t); setTimeout(()=>t.remove(),dur*1000);
+    setTimeout(spawn, 550);
+  };
+  $("gameHud").textContent="接零食！ 0"; render(); spawn();
+}
+function endGame(){
+  const sc=gameState.score; gameState=null;
+  setTimeout(()=>{
+    $("game").classList.remove("on"); $("game").querySelectorAll(".treat").forEach(t=>t.remove());
+    S.happy=clamp(S.happy+8+sc*3); S.energy=clamp(S.energy-15); S.hunger=clamp(S.hunger-6);
+    say(sc>=10?`太強了！${sc} 分！`:`拿到 ${sc} 分～`); anim("jump"); addLog(`玩接零食遊戲，得到 ${sc} 分`);
+    render(); save();
+  },1200);
+}
+
+/* ---------- name & color ---------- */
+$("saveName").onclick=()=>{
+  const n=$("nameInput").value.trim(); if(!n) return;
+  S.name=n; say(`我叫${n}！`); addLog(`取名為「${n}」`); render(); save();
+};
+$("nameInput").onkeydown=e=>{ if(e.key==="Enter") $("saveName").click(); };
+$("colors").onclick=e=>{ const c=e.target.dataset.c; if(!c) return; S.color=c; renderColors(); render(); save(); };
+
+/* ---------- modal & reset ---------- */
+function modal(icon,title,text,btn,cb){
+  $("mIcon").textContent=icon; $("mTitle").textContent=title; $("mText").textContent=text; $("mBtn").textContent=btn;
+  $("modal").classList.add("on"); $("mBtn").onclick=()=>{ $("modal").classList.remove("on"); cb&&cb(); };
+}
+$("resetBtn").onclick=()=>modal("🥚","要重新開始嗎？","目前的寵物會被替換成一顆新蛋。","確定重來",()=>{
+  S=fresh(); addLog("撿到一顆神秘的蛋"); $("nameInput").value=""; renderColors(); render(); save();
+});
+
+/* ---------- tick ---------- */
+let prevStage = null;
+function tick(){
+  const now=Date.now(); const dt=Math.min((now-last)/DAY_MS*speed, 2); last=now; // cap catch-up
+  if(S.dead) return;
+  S.age += dt;
+  const st=stage().key;
+  if(st!=="egg"){
+    const k = dt*100; // per-day rates
+    if(S.asleep){
+      S.energy=clamp(S.energy+k*1.6); S.hunger=clamp(S.hunger-k*0.35); S.happy=clamp(S.happy-k*0.1);
+      if(S.energy>=100){ S.asleep=false; say("睡飽了！"); addLog(`${petName()} 自己醒來了`); }
+    } else {
+      S.hunger=clamp(S.hunger-k*0.9); S.happy=clamp(S.happy-k*0.6); S.energy=clamp(S.energy-k*0.5);
+      S.clean=clamp(S.clean-k*0.4 - S.poops.length*k*0.15);
+      if(Math.random()<dt*1.2 && S.poops.length<4){ S.poops.push(30+Math.random()*300); say("噗…"); }
+    }
+    const bad = [S.hunger,S.happy,S.clean].filter(v=>v<15).length;
+    if(!S.sick && (S.clean<20 || S.poops.length>=3) && Math.random()<dt*2){ S.sick=true; say("咳咳…不舒服"); addLog(`${petName()} 生病了！`); }
+    S.health = clamp(S.health + (S.sick? -k*0.6 : 0) - bad*k*0.5 + (bad===0&&!S.sick? k*0.3:0));
+    if(S.health<=0){
+      S.dead=true; addLog(`${petName()} 回到星星上了…`);
+      modal("👼",`${petName()} 回到星星上了`,`牠陪了你 ${S.age.toFixed(1)} 天。要再孵一顆新蛋嗎？`,"孵新蛋",()=>{ S=fresh(); addLog("撿到一顆神秘的蛋"); renderColors(); render(); save(); });
+    }
+  }
+  if(prevStage && prevStage!==st){
+    const msg={baby:"蛋殼裂開了！毛球誕生了 🎉",kid:"長大成小孩了！頭上冒出新芽 🌱",adult:"變成大人了！⭐"}[st];
+    if(msg){ addLog(msg); say("我長大了！",2500); anim("jump"); if(st==="baby"&&!S.name) setTimeout(()=>say("幫我取名字吧！",2500),2600); }
+  }
+  prevStage=st;
+  render(); save();
+}
+
+/* idle wander */
+setInterval(()=>{
+  if(S.dead||S.asleep||gameState||stage().key==="egg") { $("petWrap").style.left="50%"; return; }
+  const w=$("petWrap"), to=25+Math.random()*50, cur=parseFloat(w.style.left)||50;
+  w.classList.toggle("flip", to<cur); w.style.left=to+"%";
+},4200);
+
+/* init */
+S = load();
+if(!S.log.length) addLog("撿到一顆神秘的蛋");
+$("nameInput").value=S.name;
+prevStage=stage().key;
+renderColors(); renderLog(); render();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
